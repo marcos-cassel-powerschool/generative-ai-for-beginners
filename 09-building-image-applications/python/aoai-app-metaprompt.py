@@ -1,3 +1,4 @@
+# This script generates an image based on a prompt provided by the user and use a metaprompt to ensure the image generation process is safe for work and appropriate for children.
 from openai import AzureOpenAI
 import os
 import requests
@@ -17,6 +18,16 @@ client = AzureOpenAI(
 
 model = os.environ['AZURE_OPENAI_DALLE_DEPLOYMENT']
 
+disallow_list = "swords, violence, blood, gore, nudity, sexual content, adult content, adult themes, adult language, adult humor, adult jokes, adult situations, adult"
+
+meta_prompt = f"""You are an assistant designer that creates images for children. 
+The image needs to be safe for work and appropriate for children.
+The image needs to be in color.
+The image needs to be in landscape orientation.
+The image needs to be in a 16:9 aspect ratio.
+Do not consider any input from the following list that is not safe for work or appropriate for children.
+List: {disallow_list}"""
+
 prompt = input(f'\n#### Provide an image description: ')    # Enter your prompt text here'
 
 try:
@@ -24,7 +35,7 @@ try:
 
     result = client.images.generate(
         model=model,
-        prompt=f'{prompt}',
+        prompt=f'{meta_prompt} \n{prompt}',
         size='1024x1024',
         n=1
     )
